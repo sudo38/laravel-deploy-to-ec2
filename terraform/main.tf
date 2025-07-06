@@ -10,8 +10,6 @@ resource "aws_instance" "laravel_server" {
   tags = {
     Name = "laravel-deploy-to-ec2"
   }
-
-  vpc_security_group_ids = [aws_security_group.allow_http_ssh.id]
 }
 
 resource "aws_security_group" "allow_http_ssh" {
