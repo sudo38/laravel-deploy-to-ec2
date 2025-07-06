@@ -3,6 +3,10 @@ resource "aws_instance" "laravel_server" {
   instance_type = var.instance_type
   key_name      = var.key_name
 
+  subnet_id                   = data.aws_subnet.default.id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.allow_http_ssh.id]
+
   tags = {
     Name = "laravel-deploy-to-ec2"
   }
