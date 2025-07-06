@@ -45,7 +45,7 @@ jobs:
         chmod 400 ~/.ssh/key.pem
 
     - name: Overview .ssh folder
-      run: cd /.ssh & ll
+      run: ls -la ~/.ssh
 
     - name: Create Ansible inventory file
       run: |
