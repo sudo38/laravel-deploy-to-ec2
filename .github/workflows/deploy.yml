@@ -25,14 +25,17 @@ jobs:
         run: terraform init
         working-directory: terraform
 
-      - name: Terraform Apply if not exists
+      - name: Terraform Check and Apply
         run: |
-          if terraform state list | grep aws_instance; then
-            echo "EC2 instance already exists. Skipping terraform apply."
-          else
-            terraform plan -out=tfplan && terraform apply -auto-approve tfplan
-          fi
+           terraform init
+           terraform plan -out=tfplan
+           if terraform show -no-color tfplan | grep "Plan:" | grep -q "No changes"; then
+              echo "No changes to apply."
+           else
+              terraform apply -auto-approve tfplan
+           fi
         working-directory: terraform
+
 
       - name: Get EC2 public IP from Terraform output
         id: tf-output
