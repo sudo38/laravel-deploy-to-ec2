@@ -46,7 +46,7 @@
         dest: /var/www/laravel/.env
 
     - name: Allow Laravel folder for git safe.directory
-      run: git config --global --add safe.directory /var/www/laravel
+      command: git config --global --add safe.directory /var/www/laravel
 
     - name: Change ownership of Laravel folder to www-data
       file:
