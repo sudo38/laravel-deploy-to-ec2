@@ -53,5 +53,9 @@ jobs:
         echo "ansible_user=${{ vars.EC2_USER }}" >> inventory.ini
         echo "ansible_ssh_private_key_file=~/.ssh/key.pem" >> inventory.ini
 
+
+    - name: Add EC2 host to known_hosts
+      run: ssh-keyscan -H ${{ env.EC2_IP }} >> ~/.ssh/known_hosts
+
     - name: Run Ansible Playbook
       run: ansible-playbook -i inventory.ini ansible/main.yml
