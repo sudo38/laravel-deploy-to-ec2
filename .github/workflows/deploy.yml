@@ -50,7 +50,7 @@ jobs:
     - name: Create Ansible inventory file
       run: |
         echo "[web]" > inventory.ini
-        echo "${{ env.EC2_IP }}" >> inventory.ini
+        echo "51.20.127.172" >> inventory.ini
         echo "" >> inventory.ini
         echo "[web:vars]" >> inventory.ini
         echo "ansible_user=${{ vars.EC2_USER }}" >> inventory.ini
@@ -58,7 +58,7 @@ jobs:
 
 
     - name: Add EC2 host to known_hosts
-      run: ssh-keyscan -H ${{ env.EC2_IP }} >> ~/.ssh/known_hosts
+      run: ssh-keyscan -H 51.20.127.172 >> ~/.ssh/known_hosts
 
     - name: Run Ansible Playbook
       run: ansible-playbook -i inventory.ini ansible/main.yml
