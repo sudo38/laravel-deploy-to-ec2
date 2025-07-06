@@ -7,7 +7,7 @@
       apt:
         update_cache: yes
 
-    - name: Install dependencies
+    - name: Install PHP extensions
       apt:
         name: [php, php-mbstring, php-xml, php-bcmath, php-curl, php-mysql, unzip, curl, git, apache2, libapache2-mod-php]
         state: present
@@ -27,13 +27,7 @@
         name: apache2
         state: restarted
 
-    # - name: Remove existing Laravel directory
-    #   file:
-    #     path: /var/www/laravel
-    #     state: absent
-
-
-    - name: Clone Laravel project
+    - name: Clone project
       git:
         repo: 'https://github.com/sudo38/laravel-deploy-to-ec2.git'
         dest: /var/www/laravel
@@ -42,9 +36,6 @@
       copy:
         src: files/.env.example
         dest: /var/www/laravel/.env
-
-    # - name: Allow Laravel folder for git safe.directory
-    #   command: git config --global --add safe.directory /var/www/laravel
 
     - name: Set ownership of storage and cache folders to www-data
       file:
@@ -65,7 +56,7 @@
         - /var/www/laravel/storage
         - /var/www/laravel/bootstrap/cache
 
-    - name: Install Laravel dependencies
+    - name: Install project dependencies
       command: composer install -q
       args:
         chdir: /var/www/laravel
