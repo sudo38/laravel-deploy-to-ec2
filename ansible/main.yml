@@ -28,6 +28,13 @@
       args:
         creates: /usr/local/bin/composer
 
+
+    - name: Remove existing Laravel directory
+      file:
+        path: /var/www/laravel
+        state: absent
+
+
     - name: Clone Laravel project
       git:
         repo: 'https://github.com/sudo38/laravel-deploy-to-ec2.git'
