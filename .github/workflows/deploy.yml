@@ -5,7 +5,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy via Ansible
+    name: Deploy Job
     runs-on: ubuntu-latest
 
     steps:
