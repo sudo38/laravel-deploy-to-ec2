@@ -9,58 +9,53 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
-
 jobs:
   deploy:
     name: Deploy Job
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout source code
-      uses: actions/checkout@v4
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
-   #  - name: Set up Terraform
-   #    uses: hashicorp/setup-terraform@v3
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
 
-   #  - name: Terraform Init
-   #    run: terraform init
-   #    working-directory: terraform
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform
 
-   #  - name: Terraform Plan
-   #    run: terraform plan -out=tfplan
-   #    working-directory: terraform
+      - name: Terraform Apply if not exists
+        run: |
+          if terraform state list | grep aws_instance; then
+            echo "EC2 instance already exists. Skipping terraform apply."
+          else
+            terraform plan -out=tfplan && terraform apply -auto-approve tfplan
+          fi
+        working-directory: terraform
 
-   #  - name: Terraform Apply
-   #    run: terraform apply -auto-approve tfplan
-   #    working-directory: terraform
+      - name: Get EC2 public IP from Terraform output
+        id: tf-output
+        run: |
+          echo "EC2_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
+        working-directory: terraform
 
-   #  - name: Get EC2 public IP from Terraform output
-   #    id: tf-output
-   #    run: |
-   #      echo "EC2_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
-   #    working-directory: terraform
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/key.pem
+          chmod 400 ~/.ssh/key.pem
 
-    - name: Set up SSH key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/key.pem
-        chmod 400 ~/.ssh/key.pem
+      - name: Add EC2 host to known_hosts
+        run: ssh-keyscan -H ${{ env.EC2_IP }} >> ~/.ssh/known_hosts
 
-    - name: Overview .ssh folder
-      run: ls -la ~/.ssh
+      - name: Create Ansible inventory file
+        run: |
+          echo "[web]" > inventory.ini
+          echo "${{ env.EC2_IP }}" >> inventory.ini
+          echo "[web:vars]" >> inventory.ini
+          echo "ansible_user=${{ vars.EC2_USER }}" >> inventory.ini
+          echo "ansible_ssh_private_key_file=~/.ssh/key.pem" >> inventory.ini
 
-    - name: Create Ansible inventory file
-      run: |
-        echo "[web]" > inventory.ini
-        echo "51.20.127.172" >> inventory.ini
-        echo "" >> inventory.ini
-        echo "[web:vars]" >> inventory.ini
-        echo "ansible_user=${{ vars.EC2_USER }}" >> inventory.ini
-        echo "ansible_ssh_private_key_file=~/.ssh/key.pem" >> inventory.ini
-
-
-    - name: Add EC2 host to known_hosts
-      run: ssh-keyscan -H 51.20.127.172 >> ~/.ssh/known_hosts
-
-    - name: Run Ansible Playbook
-      run: ansible-playbook -i inventory.ini ansible/main.yml
+      - name: Run Ansible Playbook
+        run: ansible-playbook -i inventory.ini ansible/main.yml
