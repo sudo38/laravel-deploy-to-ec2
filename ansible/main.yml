@@ -38,6 +38,13 @@
         src: files/.env.example
         dest: /var/www/laravel/.env
 
+
+    - name: Install Laravel dependencies with Composer
+      command: composer install -q
+      args:
+        chdir: /var/www/laravel
+
+
     - name: Set folder permissions
       file:
         path: /var/www/laravel/storage
