@@ -3,7 +3,6 @@
   become: yes
 
   tasks:
-
     - name: Update apt cache
       apt:
         update_cache: yes
@@ -13,14 +12,6 @@
         name: [php, php-mbstring, php-xml, php-bcmath, php-curl, php-mysql, unzip, curl, git, apache2, libapache2-mod-php]
         state: present
 
-    - name: Enable Apache mod_rewrite
-      command: a2enmod rewrite
-
-    - name: Restart Apache
-      service:
-        name: apache2
-        state: restarted
-
     - name: Install Composer
       shell: |
         curl -sS https://getcomposer.org/installer | php
@@ -28,6 +19,13 @@
       args:
         creates: /usr/local/bin/composer
 
+    - name: Enable Apache mod_rewrite
+      command: a2enmod rewrite
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
 
     # - name: Remove existing Laravel directory
     #   file:
@@ -48,30 +46,29 @@
     # - name: Allow Laravel folder for git safe.directory
     #   command: git config --global --add safe.directory /var/www/laravel
 
-    # - name: Change ownership of Laravel folder to www-data
-    #   file:
-    #     path: /var/www/laravel
-    #     state: directory
-    #     recurse: yes
-    #     owner: www-data
-    #     group: www-data
-    #     mode: "0755"
+    - name: Set ownership of storage and cache folders to www-data
+      file:
+        path: "{{ item }}"
+        owner: www-data
+        group: www-data
+        recurse: yes
+      loop:
+        - /var/www/laravel/storage
+        - /var/www/laravel/bootstrap/cache
 
+    - name: Set permissions of storage and cache folders to 775
+      file:
+        path: "{{ item }}"
+        mode: "0775"
+        recurse: yes
+      loop:
+        - /var/www/laravel/storage
+        - /var/www/laravel/bootstrap/cache
 
     - name: Install Laravel dependencies
       command: composer install -q
       args:
         chdir: /var/www/laravel
-
-
-    # - name: Set folder permissions
-    #   file:
-    #     path: /var/www/laravel/storage
-    #     state: directory
-    #     recurse: yes
-    #     owner: www-data
-    #     group: www-data
-    #     mode: "0775"
 
     - name: Set Laravel key
       command: php artisan key:generate
