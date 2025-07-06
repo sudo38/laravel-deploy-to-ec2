@@ -1,0 +1,53 @@
+- name: Setup Laravel App
+  hosts: web
+  become: yes
+
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install dependencies
+      apt:
+        name: [php, php-mbstring, php-xml, php-bcmath, php-curl, php-mysql, unzip, curl, git, apache2, libapache2-mod-php]
+        state: present
+
+    - name: Enable Apache mod_rewrite
+      command: a2enmod rewrite
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
+
+    - name: Install Composer
+      shell: |
+        curl -sS https://getcomposer.org/installer | php
+        mv composer.phar /usr/local/bin/composer
+      args:
+        creates: /usr/local/bin/composer
+
+    - name: Clone Laravel project
+      git:
+        repo: 'https://github.com/sudo38/laravel-deploy-to-ec2.git'
+        dest: /var/www/laravel
+
+    - name: Copy .env file
+      copy:
+        src: files/.env.example
+        dest: /var/www/laravel/.env
+
+    - name: Set folder permissions
+      file:
+        path: /var/www/laravel/storage
+        state: directory
+        recurse: yes
+        owner: www-data
+        group: www-data
+        mode: "0775"
+
+    - name: Set Laravel key
+      command: php artisan key:generate
+      args:
+        chdir: /var/www/laravel
