@@ -37,7 +37,7 @@
 
     - name: Copy .env file
       copy:
-        src: laravel-app/.env.example
+        src: ../.env.example
         dest: /var/www/laravel/.env
 
 
