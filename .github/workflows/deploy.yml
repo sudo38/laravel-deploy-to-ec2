@@ -25,15 +25,13 @@ jobs:
         run: terraform init
         working-directory: terraform
 
-      - name: Terraform Check and Apply
-        run: |
-           terraform init
-           terraform plan -out=tfplan
-           if terraform show -no-color tfplan | grep "Plan:" | grep -q "No changes"; then
-              echo "No changes to apply."
-           else
-              terraform apply -auto-approve tfplan
-           fi
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: terraform
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve
         working-directory: terraform
 
 
