@@ -29,10 +29,10 @@
         creates: /usr/local/bin/composer
 
 
-    - name: Remove existing Laravel directory
-      file:
-        path: /var/www/laravel
-        state: absent
+    # - name: Remove existing Laravel directory
+    #   file:
+    #     path: /var/www/laravel
+    #     state: absent
 
 
     - name: Clone Laravel project
@@ -45,17 +45,17 @@
         src: files/.env.example
         dest: /var/www/laravel/.env
 
-    - name: Allow Laravel folder for git safe.directory
-      command: git config --global --add safe.directory /var/www/laravel
+    # - name: Allow Laravel folder for git safe.directory
+    #   command: git config --global --add safe.directory /var/www/laravel
 
-    - name: Change ownership of Laravel folder to www-data
-      file:
-        path: /var/www/laravel
-        state: directory
-        recurse: yes
-        owner: www-data
-        group: www-data
-        mode: "0755"
+    # - name: Change ownership of Laravel folder to www-data
+    #   file:
+    #     path: /var/www/laravel
+    #     state: directory
+    #     recurse: yes
+    #     owner: www-data
+    #     group: www-data
+    #     mode: "0755"
 
 
     - name: Install Laravel dependencies
@@ -64,14 +64,14 @@
         chdir: /var/www/laravel
 
 
-    - name: Set folder permissions
-      file:
-        path: /var/www/laravel/storage
-        state: directory
-        recurse: yes
-        owner: www-data
-        group: www-data
-        mode: "0775"
+    # - name: Set folder permissions
+    #   file:
+    #     path: /var/www/laravel/storage
+    #     state: directory
+    #     recurse: yes
+    #     owner: www-data
+    #     group: www-data
+    #     mode: "0775"
 
     - name: Set Laravel key
       command: php artisan key:generate
