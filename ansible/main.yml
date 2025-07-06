@@ -27,7 +27,7 @@
         name: apache2
         state: restarted
 
-    - name: Pull latest code from repository
+    - name: Pull latest version from repository
       git:
         repo: 'https://github.com/sudo38/laravel-deploy-to-ec2.git'
         dest: /var/www/laravel
