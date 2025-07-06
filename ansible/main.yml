@@ -45,8 +45,20 @@
         src: files/.env.example
         dest: /var/www/laravel/.env
 
+    - name: Allow Laravel folder for git safe.directory
+      command: git config --global --add safe.directory /var/www/laravel
 
-    - name: Install Laravel dependencies with Composer
+    - name: Change ownership of Laravel folder to www-data
+      file:
+        path: /var/www/laravel
+        state: directory
+        recurse: yes
+        owner: www-data
+        group: www-data
+        mode: "0755"
+
+
+    - name: Install Laravel dependencies
       command: composer install -q
       args:
         chdir: /var/www/laravel
