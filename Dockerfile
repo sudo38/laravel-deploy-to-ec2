@@ -28,13 +28,13 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Copy existing apache config
-# COPY ./docker/vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY ./apache/vhost.conf /etc/apache2/sites-available/000-default.conf
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install Laravel dependencies
-RUN composer install -q
+RUN composer install
 
 # Generate app key
 RUN php artisan key:generate
