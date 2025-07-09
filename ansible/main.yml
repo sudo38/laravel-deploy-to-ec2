@@ -28,11 +28,11 @@
         dest: /home/ubuntu/laravel/.env
 
     - name: Build Docker image
-      command: docker compose build
+      command: docker-compose build
       args:
         chdir: /home/ubuntu/laravel
 
     - name: Run Docker container
-      command: docker compose up -d
+      command: docker-compose up -d
       args:
         chdir: /home/ubuntu/laravel
