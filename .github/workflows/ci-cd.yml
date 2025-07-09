@@ -21,6 +21,7 @@ jobs:
   build-infra:
     name: Build infra
     runs-on: ubuntu-latest
+    needs: checkout-code
 
     steps:
       - name: Set up Terraform
@@ -42,6 +43,7 @@ jobs:
   config-server:
     name: Config server
     runs-on: ubuntu-latest
+    needs: build-infra
 
     steps:
       - name: Fetch public IP
@@ -80,6 +82,7 @@ jobs:
   run-ansible:
     name: Run Ansible
     runs-on: ubuntu-latest
+    needs: config-server
 
     steps:
       - name: Run Ansible Playbook
