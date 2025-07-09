@@ -1,33 +1,38 @@
-- name: Install Docker
-  apt:
-    name: [docker.io, docker-compose]
-    state: present
-    update_cache: yes
+- name: Setup Laravel with Docker
+  hosts: web
+  become: yes
 
-- name: Ensure Docker is started
-  systemd:
-    name: docker
-    state: started
-    enabled: yes
+  tasks:
+    - name: Install Docker
+      apt:
+        name: [docker.io, docker-compose]
+        state: present
+        update_cache: yes
 
-- name: Clone latest app
-  git:
-    repo: 'https://github.com/sudo38/laravel-deploy-to-ec2.git'
-    dest: /home/ubuntu/laravel
-    version: main
-    force: yes
+    - name: Ensure Docker is started
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
 
-- name: Copy .env file
-  copy:
-    src: ../.env.example
-    dest: /home/ubuntu/laravel/.env
+    - name: Clone latest app
+      git:
+        repo: 'https://github.com/sudo38/laravel-deploy-to-ec2.git'
+        dest: /home/ubuntu/laravel
+        version: main
+        force: yes
 
-- name: Build Docker image
-  command: docker compose build
-  args:
-    chdir: /home/ubuntu/laravel
+    - name: Copy .env file
+      copy:
+        src: ../.env.example
+        dest: /home/ubuntu/laravel/.env
 
-- name: Run Docker container
-  command: docker compose up -d
-  args:
-    chdir: /home/ubuntu/laravel
+    - name: Build Docker image
+      command: docker compose build
+      args:
+        chdir: /home/ubuntu/laravel
+
+    - name: Run Docker container
+      command: docker compose up -d
+      args:
+        chdir: /home/ubuntu/laravel
