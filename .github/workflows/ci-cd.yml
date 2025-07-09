@@ -10,20 +10,14 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
 jobs:
-  checkout-code:
-    name: Checkout code
+  build-infra:
+    name: Build infra
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-  build-infra:
-    name: Build infra
-    runs-on: ubuntu-latest
-    needs: checkout-code
-
-    steps:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -46,6 +40,9 @@ jobs:
     needs: build-infra
 
     steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
       - name: Fetch public IP
         id: tf-output
         run: |
@@ -85,5 +82,8 @@ jobs:
     needs: config-server
 
     steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
       - name: Run Ansible Playbook
         run: ansible-playbook -i inventory.ini ansible/main.yml
