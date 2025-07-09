@@ -10,14 +10,19 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
 jobs:
-  deploy:
-    name: Deploy Job
+  checkout-code:
+    name: Checkout code
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+  build-infra:
+    name: Build infra
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -34,16 +39,20 @@ jobs:
         run: terraform apply -auto-approve
         working-directory: terraform
 
+  config-server:
+    name: Config server
+    runs-on: ubuntu-latest
 
-      - name: Get EC2 public IP from Terraform output
+    steps:
+      - name: Fetch public IP
         id: tf-output
         run: |
-          echo "EC2_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
+          echo "EC2_HOST=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
         working-directory: terraform
 
-      - name: Update APP_URL in .env.example with EC2 IP
+      - name: Update APP_URL in .env.example with host IP
         run: |
-          sed -i "s|^APP_URL=.*|APP_URL=http://${{ env.EC2_IP }}|" .env.example
+          sed -i "s|^APP_URL=.*|APP_URL=http://${{ env.EC2_HOST }}|" .env.example
 
       - name: Set up SSH key
         run: |
@@ -51,19 +60,27 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/key.pem
           chmod 400 ~/.ssh/key.pem
 
-      - name: Explore ~/.ssh path
+      - name: Explore ~/.ssh
         run: ls -la ~/.ssh
 
-      - name: Add EC2 host to known_hosts
-        run: ssh-keyscan -H ${{ env.EC2_IP }} >> ~/.ssh/known_hosts
+      - name: Add host IP to known_hosts
+        run: ssh-keyscan -H ${{ env.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create Ansible inventory file
+      - name: Create inventory file
         run: |
-          echo "[web]" > inventory.ini
-          echo "${{ env.EC2_IP }}" >> inventory.ini
-          echo "[web:vars]" >> inventory.ini
-          echo "ansible_user=${{ vars.EC2_USER }}" >> inventory.ini
-          echo "ansible_ssh_private_key_file=~/.ssh/key.pem" >> inventory.ini
+         cat <<EOF > inventory.ini
+         [web]
+         ${{ env.EC2_HOST }}
+         
+         [web:vars]
+         ansible_user=${{ vars.EC2_USER }}
+         ansible_ssh_private_key_file=~/.ssh/key.pem
+         EOF
 
+  run-ansible:
+    name: Run Ansible
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Run Ansible Playbook
         run: ansible-playbook -i inventory.ini ansible/main.yml
