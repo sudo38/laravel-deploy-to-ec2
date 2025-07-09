@@ -1,71 +1,33 @@
-- name: Setup Laravel App
-  hosts: web
-  become: yes
+- name: Install Docker
+  apt:
+    name: [docker.io, docker-compose]
+    state: present
+    update_cache: yes
 
-  tasks:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
+- name: Ensure Docker is started
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
 
-    - name: Install PHP extensions
-      apt:
-        name: [php, php-mbstring, php-xml, php-bcmath, php-curl, php-mysql, unzip, curl, git, apache2, libapache2-mod-php]
-        state: present
+- name: Clone latest app
+  git:
+    repo: 'https://github.com/sudo38/laravel-deploy-to-ec2.git'
+    dest: /home/ubuntu/laravel
+    version: main
+    force: yes
 
-    - name: Install Composer
-      shell: |
-        curl -sS https://getcomposer.org/installer | php
-        mv composer.phar /usr/local/bin/composer
-      args:
-        creates: /usr/local/bin/composer
+- name: Copy .env file
+  copy:
+    src: ../.env.example
+    dest: /home/ubuntu/laravel/.env
 
-    - name: Enable Apache mod_rewrite
-      command: a2enmod rewrite
+- name: Build Docker image
+  command: docker compose build
+  args:
+    chdir: /home/ubuntu/laravel
 
-    - name: Restart Apache
-      service:
-        name: apache2
-        state: restarted
-
-    - name: Pull latest version from repository
-      git:
-        repo: 'https://github.com/sudo38/laravel-deploy-to-ec2.git'
-        dest: /var/www/laravel
-        version: main
-        update: yes
-        force: yes
-
-    - name: Copy .env file
-      copy:
-        src: ../.env.example
-        dest: /var/www/laravel/.env
-
-
-    - name: Set ownership of storage and cache folders to www-data
-      file:
-        path: "{{ item }}"
-        owner: www-data
-        group: www-data
-        recurse: yes
-      loop:
-        - /var/www/laravel/storage
-        - /var/www/laravel/bootstrap/cache
-
-    - name: Set permissions of storage and cache folders to 775
-      file:
-        path: "{{ item }}"
-        mode: "0775"
-        recurse: yes
-      loop:
-        - /var/www/laravel/storage
-        - /var/www/laravel/bootstrap/cache
-
-    - name: Install project dependencies
-      command: composer install -q
-      args:
-        chdir: /var/www/laravel
-
-    - name: Set Laravel key
-      command: php artisan key:generate
-      args:
-        chdir: /var/www/laravel
+- name: Run Docker container
+  command: docker compose up -d
+  args:
+    chdir: /home/ubuntu/laravel
