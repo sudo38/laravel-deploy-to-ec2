@@ -6,7 +6,4 @@ services:
     ports:
       - "80:80"
     volumes:
-      - .:/var/www/html
-    environment:
-      - APP_ENV=production
-      - APP_KEY
+      - .: /var/www/html
