@@ -32,7 +32,14 @@ COPY ./apache/vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install Laravel dependencies
-RUN composer install
+#RUN composer install
 
 # Generate app key
-RUN php artisan key:generate
+#RUN php artisan key:generate
+
+# Move script.sh to container
+COPY ./docker/script.sh /script.sh
+RUN chmod +x /script.sh
+
+# Default command
+ENTRYPOINT ["/script.sh"]
