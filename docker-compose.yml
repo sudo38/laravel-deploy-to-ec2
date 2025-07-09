@@ -20,8 +20,8 @@ services:
     environment:
       MYSQL_DATABASE: laravel
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: rayan
-      MYSQL_PASSWORD: 123456
+      MYSQL_USER: root
+      MYSQL_PASSWORD:
     volumes:
       - dbdata:/var/lib/mysql
 
