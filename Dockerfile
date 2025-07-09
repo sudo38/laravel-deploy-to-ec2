@@ -22,7 +22,10 @@ WORKDIR /var/www/html
 COPY . .
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html
+# RUN chown -R www-data:www-data /var/www/html
+
+RUN sudo chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN sudo chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Copy existing apache config
 # COPY ./docker/vhost.conf /etc/apache2/sites-available/000-default.conf
