@@ -1,53 +1,65 @@
-name: Build and Deploy using Artifacts
+name: Laravel Build and Deploy using Artifacts
 
 on:
-  workflow_dispatch
+  push:
+    branches:
+      - main
 
 jobs:
   build:
-    name: Build Project
+    name: Build Laravel App
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js (example)
-        uses: actions/setup-node@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          node-version: '18'
+          php-version: '8.2'
+          extensions: mbstring, bcmath, intl, curl, xml, zip
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: npm install
+        run: composer install --no-progress --no-suggest --prefer-dist
 
-      - name: Build the project
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Prepare build artifact
         run: |
           mkdir -p build
-          echo "This is the build output" > build/output.txt
+          cp -r app bootstrap config database public resources routes storage artisan composer.* build/
+          echo "Laravel app prepared" > build/info.txt
 
-      - name: Upload Build Artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifact
+          name: laravel-artifact
           path: build/
 
   deploy:
-    name: Deploy Project
+    name: Deploy Laravel App
     runs-on: ubuntu-latest
     needs: build
 
     steps:
-      - name: Download Build Artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          name: build-artifact
-          path: ./deployed-build
+          name: laravel-artifact
+          path: ./deployed-laravel
 
-      - name: Display Artifact Contents
-        run: |
-          echo "Listing contents of downloaded artifact:"
-          ls -R ./deployed-build
+      - name: List downloaded contents
+        run: ls -R ./deployed-laravel
 
-      # Simulate deployment
-      - name: Deploy (simulation)
-        run: echo "Deploying application from ./deployed-build/output.txt"
+      - name: Simulate deployment
+        run: echo "Simulating Laravel deployment from ./deployed-laravel"
