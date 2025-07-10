@@ -7,7 +7,7 @@
       apt:
         update_cache: yes
 
-    - name: Install packages
+    - name: Prepard packages
       apt:
         name:
           - apt-transport-https
@@ -16,17 +16,17 @@
           - software-properties-common
         state: present
 
-    - name: Add Docker official GPG key
+    - name: Add Docker GPG key
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
 
-    - name: Add Docker APT repository
+    - name: Add Docker APT repo
       apt_repository:
         repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
 
-    - name: Install Docker CE
+    - name: Install Docker
       apt:
         name: docker-ce
         state: present
@@ -43,7 +43,7 @@
         state: started
         enabled: yes
 
-    - name: Pull latest app version
+    - name: Fetch latest app
       git:
         repo: 'https://github.com/sudo38/laravel-deploy-to-ec2.git'
         dest: /home/ubuntu/laravel
