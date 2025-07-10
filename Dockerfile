@@ -21,21 +21,11 @@ WORKDIR /var/www/html
 # Copy app files
 COPY . .
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
 # Copy existing apache config
 COPY ./apache/vhost.conf /etc/apache2/sites-available/000-default.conf
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Install Laravel dependencies
-#RUN composer install
-
-# Generate app key
-#RUN php artisan key:generate
 
 # Move script.sh to container
 COPY ./docker/script.sh /script.sh

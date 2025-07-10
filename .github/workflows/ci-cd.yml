@@ -40,7 +40,7 @@ jobs:
           echo "EC2_HOST=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
         working-directory: terraform
 
-      - name: Update APP_URL in .env.example with host IP
+      - name: Update APP_URL in .env.example
         run: |
           sed -i "s|^APP_URL=.*|APP_URL=http://${{ env.EC2_HOST }}|" .env.example
 
@@ -50,7 +50,7 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/key.pem
           chmod 400 ~/.ssh/key.pem
 
-      - name: Add host IP to known_hosts
+      - name: Add host to known_hosts
         run: ssh-keyscan -H ${{ env.EC2_HOST }} >> ~/.ssh/known_hosts
 
       - name: Create inventory file
