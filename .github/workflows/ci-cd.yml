@@ -40,7 +40,7 @@ jobs:
           echo "EC2_HOST=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
         working-directory: terraform
 
-      - name: Update APP_URL in .env.example
+      - name: Update .env.example
         run: |
           sed -i "s|^APP_URL=.*|APP_URL=http://${{ env.EC2_HOST }}|" .env.example
 
