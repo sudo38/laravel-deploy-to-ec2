@@ -19,5 +19,11 @@ chmod -R 775 storage bootstrap/cache
 echo "🔑 Generating app key..."
 php artisan key:generate
 
+echo "🧹 Clearing and caching config and routes..."
+php artisan config:clear
+php artisan config:cache
+php artisan route:clear
+php artisan route:cache
+
 echo "🚀 Starting Apache..."
 exec apache2-foreground

@@ -3,11 +3,11 @@
   become: yes
 
   tasks:
-    - name: Update APT package index
+    - name: Update APT package
       apt:
         update_cache: yes
 
-    - name: Install prerequisite packages
+    - name: Install packages
       apt:
         name:
           - apt-transport-https
@@ -16,7 +16,7 @@
           - software-properties-common
         state: present
 
-    - name: Add Docker’s official GPG key
+    - name: Add Docker official GPG key
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
@@ -26,14 +26,16 @@
         repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
 
-    - name: Update APT package index after adding Docker repo
-      apt:
-        update_cache: yes
-
     - name: Install Docker CE
       apt:
         name: docker-ce
         state: present
+
+    - name: Add user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
 
     - name: Ensure Docker is started
       systemd:
@@ -41,7 +43,7 @@
         state: started
         enabled: yes
 
-    - name: Clone latest app
+    - name: Pull latest app version
       git:
         repo: 'https://github.com/sudo38/laravel-deploy-to-ec2.git'
         dest: /home/ubuntu/laravel

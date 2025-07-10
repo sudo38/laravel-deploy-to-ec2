@@ -21,51 +21,55 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        run: terraform init
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
         working-directory: terraform
 
-      - name: Terraform Plan
-        run: terraform plan
-        working-directory: terraform
+      # - name: Terraform Init
+      #   run: terraform init
+      #   working-directory: terraform
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve
-        working-directory: terraform
+      # - name: Terraform Plan
+      #   run: terraform plan
+      #   working-directory: terraform
 
-      - name: Fetch public IP
-        id: tf-output
-        run: |
-          echo "EC2_HOST=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
-        working-directory: terraform
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/main'
+      #   run: terraform apply -auto-approve
+      #   working-directory: terraform
 
-      - name: Update APP_URL in .env.example with host IP
-        run: |
-          sed -i "s|^APP_URL=.*|APP_URL=http://${{ env.EC2_HOST }}|" .env.example
+      # - name: Fetch public IP
+      #   id: tf-output
+      #   run: |
+      #     echo "EC2_HOST=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
+      #   working-directory: terraform
 
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/key.pem
-          chmod 400 ~/.ssh/key.pem
+      # - name: Update APP_URL in .env.example with host IP
+      #   run: |
+      #     sed -i "s|^APP_URL=.*|APP_URL=http://${{ env.EC2_HOST }}|" .env.example
 
-      - name: Explore ~/.ssh
-        run: ls -la ~/.ssh
+      # - name: Set up SSH key
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/key.pem
+      #     chmod 400 ~/.ssh/key.pem
 
-      - name: Add host IP to known_hosts
-        run: ssh-keyscan -H ${{ env.EC2_HOST }} >> ~/.ssh/known_hosts
+      # - name: Add host IP to known_hosts
+      #   run: ssh-keyscan -H ${{ env.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create inventory file
-        run: |
-         cat <<EOF > inventory.ini
-         [web]
-         ${{ env.EC2_HOST }}
+      # - name: Explore ~/.ssh/known_hosts
+      #   run: ls -la ~/.ssh/known_hosts
+
+      # - name: Create inventory file
+      #   run: |
+      #    cat <<EOF > inventory.ini
+      #    [web]
+      #    ${{ env.EC2_HOST }}
          
-         [web:vars]
-         ansible_user=${{ vars.EC2_USER }}
-         ansible_ssh_private_key_file=~/.ssh/key.pem
-         EOF
+      #    [web:vars]
+      #    ansible_user=${{ vars.EC2_USER }}
+      #    ansible_ssh_private_key_file=~/.ssh/key.pem
+      #    EOF
 
-      - name: Run Ansible Playbook
-        run: ansible-playbook -i inventory.ini ansible/main.yml
+      # - name: Run Ansible Playbook
+      #   run: ansible-playbook -i inventory.ini ansible/main.yml
