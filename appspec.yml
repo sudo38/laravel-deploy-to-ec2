@@ -3,10 +3,10 @@ os: linux
 
 files:
   - source: /
-    destination: /var/www/laravel-app
+    destination: /home/ec2-user/deploy-temp
 
 hooks:
   AfterInstall:
     - location: scripts/restart.sh
-      timeout: 300
+      timeout: 600
       runas: ec2-user
