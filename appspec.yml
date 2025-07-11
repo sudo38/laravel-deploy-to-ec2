@@ -8,5 +8,5 @@ files:
 hooks:
   AfterInstall:
     - location: scripts/restart.sh
-      timeout: 600
+      timeout: 300
       runas: ec2-user
